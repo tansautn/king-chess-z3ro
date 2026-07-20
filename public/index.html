@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>King Chess — Cờ Vua không quảng cáo</title>
+    <meta
+      name="description"
+      content="Chơi cờ Vua không quảng cáo. Chơi offline, cài ra màn hình chính, có undo/redo."
+    />
+
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0f1720" />
+    <link rel="stylesheet" href="/app.css" />
+
+    <!-- Home-screen / standalone support -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="King Chess" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="icon" href="/icons/icon-192.png" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <h1 class="brand"><span class="crown">♔</span> King Chess</h1>
+        <div class="topbar-right">
+          <span id="net" class="net" title="Trạng thái mạng">●</span>
+          <button id="install" class="btn btn-ghost" hidden>Cài đặt</button>
+        </div>
+      </header>
+
+      <p id="status" class="status" role="status" aria-live="polite">
+        Đến lượt Trắng
+      </p>
+
+      <div class="board-wrap">
+        <div id="board" class="board" aria-label="Bàn cờ"></div>
+      </div>
+
+      <div class="controls">
+        <button id="new" class="btn btn-primary">♟ Ván mới</button>
+        <button id="undo" class="btn">↶ Đi lại</button>
+        <button id="redo" class="btn">↷ Đi tiếp</button>
+        <button id="flip" class="btn">⇅ Lật bàn</button>
+        <button id="hint" class="btn">💡 Gợi ý</button>
+        <button id="history-btn" class="btn">🗂 Lịch sử</button>
+      </div>
+
+      <div class="settings">
+        <label>
+          Bên của bạn
+          <select id="side">
+            <option value="w" selected>Trắng</option>
+            <option value="b">Đen</option>
+          </select>
+        </label>
+        <label>
+          Độ khó
+          <select id="level">
+            <option value="easy">Dễ</option>
+            <option value="medium" selected>Vừa</option>
+            <option value="hard">Khó</option>
+          </select>
+        </label>
+      </div>
+
+      <details class="moves">
+        <summary>Các nước đi</summary>
+        <ol id="movelist" class="movelist"></ol>
+      </details>
+    </div>
+
+    <!-- Promotion picker -->
+    <div id="promo" class="modal" hidden>
+      <div class="modal-card">
+        <p>Phong cấp thành:</p>
+        <div class="promo-choices">
+          <button class="promo" data-piece="q">♛ Hậu</button>
+          <button class="promo" data-piece="r">♜ Xe</button>
+          <button class="promo" data-piece="b">♝ Tượng</button>
+          <button class="promo" data-piece="n">♞ Mã</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved games -->
+    <div id="history" class="modal" hidden>
+      <div class="modal-card modal-list">
+        <div class="modal-head">
+          <h2>Lịch sử ván đấu</h2>
+          <button id="history-close" class="btn btn-ghost">✕</button>
+        </div>
+        <ul id="history-list" class="history-list"></ul>
+        <p id="history-empty" class="muted" hidden>Chưa có ván nào được lưu.</p>
+      </div>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

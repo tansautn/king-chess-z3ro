@@ -1,0 +1,23 @@
+# Cloudflare Worker config — King Chess (ad-free chess PWA)
+# Deploy:  npx wrangler deploy
+# Dev:     npx wrangler dev
+name = "kcz"
+main = "src/worker.js"
+compatibility_date = "2025-01-15"
+
+# Static PWA assets (the whole app shell) are served straight from ./public.
+# The Worker only runs for paths that don't match an asset (e.g. /api/*).
+[assets]
+directory = "./public"
+binding = "ASSETS"
+# SPA-friendly: unknown paths fall back to index.html (kept single-page).
+not_found_handling = "single-page-application"
+
+# --- Optional: enable server-side sync storage -----------------------------
+# Uncomment and create a KV namespace to persist synced games in the cloud.
+#   npx wrangler kv namespace create GAMES_KV
+# then paste the returned id below.
+[[kv_namespaces]]
+binding = "GAMES_KV"
+id = "447d8fe530714bffb5b56bed40da001b"
+# id = "<your-kv-namespace-id>"
