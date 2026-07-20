@@ -2,10 +2,9 @@
     <img src="https://avatars0.githubusercontent.com/u/6666271?v=3&s=96" alt="Z-Logo"
          title="Halu Universe" align="right" />
 </a>
-# chiếu tướng !~
+&nbsp;
 
-
-# ♔ King Chess Zero
+# ♔ King Chess z3ro ♔
 
 > **Trải nghiệm cờ vua hiện đại, không quảng cáo, dành cho mọi người.**
 
@@ -70,3 +69,10 @@ Chỉ có cờ vua.
 * Đồng bộ nền (Background Synchronization)
 * Giao diện đáp ứng (Responsive UI)
 * Lưu trữ dữ liệu cục bộ (Local-first Storage)
+
+----
+
+<div align="center">
+<h3>by <a href="https://zuko.pro" target="_blank"><strong>Zuko</strong></a><br/></h3>
+<h4>💠 𝔽𝕣𝕠𝕞 🆅🅸🅽🅰︎🅷🅾︎🆄🆂🅴 𝕨𝕚𝕥𝕙 ❤️ 💠</h4>
+</div>
