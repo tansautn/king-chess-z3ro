@@ -6,8 +6,8 @@
   --muted: #8ba0b6;
   --accent: #f5b301;
   --accent-2: #4a90d9;
-  --light: #efe6d2; /* light square */
-  --dark: #6f8caa; /* dark square  */
+  --light: #eef2f6; /* light square — sáng gần trắng để tăng tương phản */
+  --dark: #3a5068; /* dark square — sẫm hơn để tương phản rõ trắng/đen */
   --sel: #f5b30188;
   --piece-w: #e23b3b; /* quân bên Trắng — mặc định Đỏ */
   --piece-b: #2fae4e; /* quân bên Đen — mặc định Xanh lá */
@@ -94,7 +94,17 @@ body {
 .board-wrap {
   width: 100%;
 }
+/* Bàn cờ + thước toạ độ nằm NGOÀI bàn cờ (rank bên trái, file bên dưới). */
+.board-frame {
+  position: relative;
+  display: grid;
+  grid-template-columns: clamp(14px, 4.5vw, 22px) 1fr;
+  grid-template-rows: 1fr clamp(14px, 4.5vw, 22px);
+  gap: 3px;
+}
 .board {
+  grid-column: 2;
+  grid-row: 1;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
@@ -163,26 +173,27 @@ body {
     1px 0 0 #333, -1px 0 0 #333, 0 1px 0 #333, 0 -1px 0 #333;
 }
 
-/* coordinate labels */
-.sq .coord {
-  position: absolute;
-  font-size: 10px;
+/* coordinate ruler (outside the board) */
+.ruler {
+  display: grid;
+  color: var(--muted);
+  font-size: clamp(9px, 2.6vw, 12px);
   font-weight: 700;
-  opacity: 0.55;
 }
-.sq .coord.file {
-  right: 3px;
-  bottom: 1px;
+.ruler > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.sq .coord.rank {
-  left: 3px;
-  top: 1px;
+.ruler.ranks {
+  grid-column: 1;
+  grid-row: 1;
+  grid-template-rows: repeat(8, 1fr);
 }
-.sq.light .coord {
-  color: #6f8caa;
-}
-.sq.dark .coord {
-  color: #efe6d2;
+.ruler.files {
+  grid-column: 2;
+  grid-row: 2;
+  grid-template-columns: repeat(8, 1fr);
 }
 
 /* Controls */
@@ -233,8 +244,12 @@ body {
 /* Settings */
 .settings {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 12px;
+}
+.settings[hidden] {
+  display: none;
 }
 .settings label {
   flex: 1;
@@ -430,4 +445,60 @@ body {
 .toast.show {
   opacity: 1;
   transform: translateX(-50%) translateY(-4px);
+}
+
+/* ===========================================================================
+   Focus mode — ẩn bớt nút, phóng to bàn cờ, vào chế độ toàn màn hình
+   =========================================================================== */
+
+/* Nút thoát toàn màn hình — đặt ở gốc toạ độ (giao trục X/Y), góc dưới trái. */
+.focus-exit {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: clamp(30px, 9vw, 42px);
+  height: clamp(30px, 9vw, 42px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #2a3a4d;
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--accent);
+  font-size: clamp(15px, 4.5vw, 20px);
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  z-index: 2;
+}
+.focus-exit:hover {
+  background: var(--panel-2);
+}
+body.focus-mode .focus-exit {
+  display: flex;
+}
+
+/* Trong chế độ tập trung: giấu mọi thứ trừ bàn cờ + thước toạ độ. */
+body.focus-mode .topbar,
+body.focus-mode .status,
+body.focus-mode .controls,
+body.focus-mode .settings,
+body.focus-mode .moves,
+body.focus-mode .credit {
+  display: none !important;
+}
+body.focus-mode {
+  background: var(--bg);
+}
+body.focus-mode .app {
+  max-width: none;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(8px, env(safe-area-inset-top)) 10px max(8px, env(safe-area-inset-bottom));
+}
+body.focus-mode .board-wrap {
+  width: min(96vw, 92dvh);
 }
