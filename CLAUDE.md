@@ -48,6 +48,10 @@ These couplings span multiple files and are the main source of "why did my chang
 
 5. **Cloudflare Assets serves `/`, not `/index.html`.** `/index.html` 307-redirects to `/`, and `cache.addAll()` rejects on a redirected response — so `sw.js` caches and serves `/` for navigations. Don't add `/index.html` to `APP_SHELL`.
 
+### Usage stats (anonymous play counter)
+
+A minimal "is anyone using it" counter, separate from game-history sync. `app.js` counts every `newGame()` into `localStorage` (`kingchess.plays`) and flushes the pending delta to `POST /api/plays` on load, on reconnect, and every 2 minutes; on success it subtracts exactly what it sent (effectively resets to 0) so mid-flight plays aren't lost. The Worker folds the count into a KV total (`stats:plays`, best-effort — no atomic increment). Any request carrying the **`X-Zuko-Debug`** header gets the running `total` back; the client enables debug via `?debug=1` (sticky in `localStorage.kingchess.debug`), which shows a corner badge and polls on the same 2-minute timer.
+
 ### Piece colours (configurable, local-only)
 
 Both sides' piece colours are user-configurable, default **Red (white side) vs. Green (black side)**. Pieces are Unicode glyphs whose fill is driven by CSS custom properties `--piece-w` / `--piece-b`; `app.js` reads/writes them to `localStorage` under the key `kingchess.pieceColors` and applies them to the document root. The two `<input type="color">` controls live in the settings block in `index.html`.
