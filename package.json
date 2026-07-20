@@ -5,8 +5,11 @@
   "type": "module",
   "private" : true,
   "scripts": {
+    "gen:version": "node scripts/gen-version.mjs",
+    "predev": "npm run gen:version",
     "dev": "wrangler dev",
     "start": "wrangler dev",
+    "predeploy": "npm run gen:version",
     "deploy": "wrangler deploy",
     "icons": "node scripts/generate-icons.mjs",
     "test": "echo \"No unit tests\" && exit 0"

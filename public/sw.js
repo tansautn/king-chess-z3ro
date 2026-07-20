@@ -11,7 +11,7 @@
  * own small IndexedDB helper mirroring db.js (keep the constants in sync).
  */
 
-const CACHE = 'king-chess-v4';
+const CACHE = 'king-chess-279e1e4.1784566257655';
 const SYNC_TAG = 'sync-games';
 
 // Must match db.js
@@ -25,6 +25,7 @@ const APP_SHELL = [
   '/',
   '/app.css',
   '/app.js',
+  '/version.js',
   '/engine.js',
   '/db.js',
   '/ai-worker.js',

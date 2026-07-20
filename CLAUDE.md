@@ -17,6 +17,8 @@ npm run icons    # regenerate PWA icons from scripts/generate-icons.mjs
 npm test         # stub only — echoes "No unit tests" and exits 0
 ```
 
+`predev`/`predeploy` run `scripts/gen-version.mjs`, which stamps a build version (`<git-sha>.<epoch>`) into `public/version.js` **and** rewrites the `CACHE` name in `sw.js`. `public/version.js` is generated — don't hand-edit it.
+
 There is **no linter and no test runner configured**. Source is Prettier-formatted (note the `// prettier-ignore` directives on the piece-square tables in `engine.js`); match that style. `wrangler dev` serves the app the same way production does, so verify changes by driving the running app.
 
 ## Architecture
@@ -36,7 +38,7 @@ Two layers: a static PWA under `public/` (the whole game) and a thin Cloudflare 
 
 These couplings span multiple files and are the main source of "why did my change not take effect":
 
-1. **App-shell cache must be maintained by hand.** When you add, remove, or rename any file under `public/`, update the `APP_SHELL` list **and bump the `CACHE` version** (`king-chess-vN`) in `sw.js`. The `activate` handler deletes any cache whose name isn't the current one, so bumping the version is what forces returning clients (and installed PWAs) to pick up new assets. Every asset change in this repo bumps that version for this reason.
+1. **App-shell cache list is hand-maintained; the cache *version* is automatic.** When you add, remove, or rename any file under `public/`, update the `APP_SHELL` list in `sw.js`. You do **not** hand-bump the `CACHE` name anymore — `gen-version.mjs` rewrites it every build. The `activate` handler deletes any cache whose name isn't the current one; because the name changes each deploy, returning clients (and installed PWAs) get fresh assets, and `app.js` auto-reloads onto them: a new SW calls `skipWaiting()`, takes control, fires `controllerchange`, and the page reloads once (guarded by `hadController` so the first-ever visit doesn't reload). `app.js` also calls `reg.update()` on load, focus, and reconnect so long-lived sessions notice new deploys.
 
 2. **IndexedDB constants are duplicated.** `sw.js` is a classic worker and embeds its **own** copy of the IndexedDB helper that mirrors `db.js`. `DB_NAME` (`king-chess`), `DB_VERSION` (1), and `STORE` (`games`) — plus the object-store schema in `onupgradeneeded` — **must stay identical** between the two files.
 
