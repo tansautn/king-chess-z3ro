@@ -84,6 +84,80 @@ function initPieceColors() {
 }
 
 // ===========================================================================
+// Usage stats — "có ai xài app không"
+//
+// Every New Game counts as one play. The count lives in localStorage so it
+// survives reloads and offline sessions; a 2-minute timer (plus load/online)
+// flushes the pending delta to POST /api/plays, which folds it into the
+// server-side total and returns the total when we ask in debug mode. On a
+// successful flush we subtract exactly what we sent (so plays that happened
+// mid-request aren't lost), i.e. effectively reset to 0.
+//
+// Debug mode (add ?debug=1 to the URL, sticky via localStorage): we send the
+// `X-Zuko-Debug` header, show the total in a small badge, and poll every 2 min.
+// ===========================================================================
+
+const PLAYS_KEY = 'kingchess.plays'; // pending plays not yet synced
+const DEBUG_KEY = 'kingchess.debug';
+const STATS_INTERVAL_MS = 2 * 60 * 1000;
+
+function debugEnabled() {
+  const q = new URL(location.href).searchParams.get('debug');
+  if (q === '1') localStorage.setItem(DEBUG_KEY, '1');
+  else if (q === '0') localStorage.removeItem(DEBUG_KEY);
+  return localStorage.getItem(DEBUG_KEY) === '1';
+}
+
+function getPendingPlays() {
+  return parseInt(localStorage.getItem(PLAYS_KEY), 10) || 0;
+}
+
+function countPlay() {
+  localStorage.setItem(PLAYS_KEY, String(getPendingPlays() + 1));
+}
+
+let debugBadgeEl;
+function showDebugTotal(total) {
+  if (!debugBadgeEl) {
+    debugBadgeEl = document.createElement('div');
+    debugBadgeEl.className = 'debug-badge';
+    document.body.appendChild(debugBadgeEl);
+  }
+  debugBadgeEl.textContent = `▲ ${total} lượt chơi`;
+}
+
+async function flushPlays() {
+  const debug = debugEnabled();
+  const pending = getPendingPlays();
+  if (pending === 0 && !debug) return; // nothing to send, not watching
+  if (!navigator.onLine) return;
+  try {
+    const res = await fetch('/api/plays', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        ...(debug ? { 'X-Zuko-Debug': '1' } : {}),
+      },
+      body: JSON.stringify({ count: pending }),
+    });
+    if (!res.ok) return;
+    const data = await res.json().catch(() => ({}));
+    // Subtract only what we actually sent; concurrent New Games stay counted.
+    localStorage.setItem(PLAYS_KEY, String(Math.max(0, getPendingPlays() - pending)));
+    if (debug && typeof data.total === 'number') showDebugTotal(data.total);
+  } catch {
+    /* offline / server down — the pending count stays and retries next tick */
+  }
+}
+
+function initStats() {
+  if (debugEnabled()) showDebugTotal('…');
+  flushPlays();
+  setInterval(flushPlays, STATS_INTERVAL_MS);
+  window.addEventListener('online', flushPlays);
+}
+
+// ===========================================================================
 // Board building & rendering
 // ===========================================================================
 
@@ -401,6 +475,7 @@ function redo() {
 // ===========================================================================
 
 function newGame() {
+  countPlay();
   humanColor = $('side').value;
   level = $('level').value;
   orientation = humanColor;
@@ -755,3 +830,4 @@ if ('serviceWorker' in navigator) {
 initPieceColors();
 updateNet();
 newGame();
+initStats();

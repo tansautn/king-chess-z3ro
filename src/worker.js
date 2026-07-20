@@ -17,8 +17,18 @@ const JSON_HEADERS = {
   // The PWA is same-origin, but keep sync robust if hosted on a subdomain.
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, OPTIONS',
-  'access-control-allow-headers': 'content-type',
+  'access-control-allow-headers': 'content-type, x-zuko-debug',
 };
+
+// Anonymous "is anyone playing?" counter. Each client counts New Game presses
+// locally and periodically syncs the delta up; we accumulate it here.
+const PLAYS_KEY = 'stats:plays';
+
+async function readPlays(env) {
+  if (!env.GAMES_KV) return 0;
+  const raw = await env.GAMES_KV.get(PLAYS_KEY);
+  return raw ? parseInt(raw, 10) || 0 : 0;
+}
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
@@ -50,6 +60,38 @@ async function handleApi(request, env, url) {
       kv: Boolean(env.GAMES_KV),
       time: Date.now(),
     });
+  }
+
+  // Usage counter. POST adds the client's pending count into the running total
+  // and (when asked) reports it back so the client can reset to 0. Any request
+  // carrying the `X-Zuko-Debug` header gets the current total in the response.
+  if (url.pathname === '/api/plays') {
+    const debug = request.headers.has('x-zuko-debug');
+
+    if (request.method === 'POST') {
+      let payload;
+      try {
+        payload = await request.json();
+      } catch {
+        payload = {};
+      }
+      // Clamp to a sane range so a bad/hostile client can't skew the counter.
+      const count = Math.max(0, Math.min(1000, Math.floor(Number(payload?.count) || 0)));
+      let total = await readPlays(env);
+      total += count;
+      if (count > 0 && env.GAMES_KV) {
+        await env.GAMES_KV.put(PLAYS_KEY, String(total));
+      }
+      const body = { ok: true, accepted: count };
+      if (debug) body.total = total;
+      return json(body);
+    }
+
+    if (request.method === 'GET') {
+      const body = { ok: true };
+      if (debug) body.total = await readPlays(env);
+      return json(body);
+    }
   }
 
   // Receive a batch of games from the Service Worker's background sync.
