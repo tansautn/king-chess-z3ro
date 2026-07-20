@@ -40,6 +40,47 @@ let thinking = false; // computer is searching
 let swReg = null;
 
 // ===========================================================================
+// Piece colours — cấu hình màu quân 2 bên, lưu localStorage
+// ===========================================================================
+
+const PIECE_COLOR_KEY = 'kingchess.pieceColors';
+const DEFAULT_PIECE_COLORS = { w: '#e23b3b', b: '#2fae4e' }; // Đỏ vs Xanh lá
+
+function loadPieceColors() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PIECE_COLOR_KEY) || '{}');
+    return {
+      w: saved.w || DEFAULT_PIECE_COLORS.w,
+      b: saved.b || DEFAULT_PIECE_COLORS.b,
+    };
+  } catch {
+    return { ...DEFAULT_PIECE_COLORS };
+  }
+}
+
+function applyPieceColors(colors) {
+  document.documentElement.style.setProperty('--piece-w', colors.w);
+  document.documentElement.style.setProperty('--piece-b', colors.b);
+}
+
+function initPieceColors() {
+  const colors = loadPieceColors();
+  applyPieceColors(colors);
+  const inputW = $('color-w');
+  const inputB = $('color-b');
+  inputW.value = colors.w;
+  inputB.value = colors.b;
+
+  const persist = () => {
+    const next = { w: inputW.value, b: inputB.value };
+    applyPieceColors(next);
+    localStorage.setItem(PIECE_COLOR_KEY, JSON.stringify(next));
+  };
+  inputW.addEventListener('input', persist);
+  inputB.addEventListener('input', persist);
+}
+
+// ===========================================================================
 // Board building & rendering
 // ===========================================================================
 
@@ -639,5 +680,6 @@ if ('serviceWorker' in navigator) {
 }
 
 // ---- Boot ------------------------------------------------------------------
+initPieceColors();
 updateNet();
 newGame();

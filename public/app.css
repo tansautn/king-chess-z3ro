@@ -9,6 +9,8 @@
   --light: #efe6d2; /* light square */
   --dark: #6f8caa; /* dark square  */
   --sel: #f5b30188;
+  --piece-w: #e23b3b; /* quân bên Trắng — mặc định Đỏ */
+  --piece-b: #2fae4e; /* quân bên Đen — mặc định Xanh lá */
   --move-dot: #1f2a3799;
   --last: #f5b30144;
   --check: #e04b4b88;
@@ -149,14 +151,16 @@ body {
 .piece {
   pointer-events: none;
 }
+/* Cả hai bên đều có viền tối mảnh để mọi màu cấu hình vẫn rõ trên mọi ô. */
 .piece.w {
-  color: #ffffff;
+  color: var(--piece-w, #ffffff);
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35), 0 0 2px rgba(0, 0, 0, 0.6),
     1px 0 0 #333, -1px 0 0 #333, 0 1px 0 #333, 0 -1px 0 #333;
 }
 .piece.b {
-  color: #10151b;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.15);
+  color: var(--piece-b, #10151b);
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35), 0 0 2px rgba(0, 0, 0, 0.6),
+    1px 0 0 #333, -1px 0 0 #333, 0 1px 0 #333, 0 -1px 0 #333;
 }
 
 /* coordinate labels */
@@ -247,6 +251,15 @@ body {
   background: var(--panel);
   color: var(--text);
   font-size: 0.95rem;
+}
+.settings input[type='color'] {
+  padding: 3px;
+  height: 40px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #2a3a4d;
+  background: var(--panel);
+  cursor: pointer;
 }
 
 /* Move list */
