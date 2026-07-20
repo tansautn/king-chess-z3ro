@@ -10,6 +10,7 @@
  * wrangler.toml), synced games are persisted there; otherwise the endpoint
  * still acknowledges the sync so the client can mark records as synced.
  */
+import { VERSION } from '../public/version.js';
 
 const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
@@ -43,7 +44,12 @@ async function handleApi(request, env, url) {
 
   // Health check.
   if (url.pathname === '/api/health') {
-    return json({ ok: true, kv: Boolean(env.GAMES_KV), time: Date.now() });
+    return json({
+      ok: true,
+      version: VERSION,
+      kv: Boolean(env.GAMES_KV),
+      time: Date.now(),
+    });
   }
 
   // Receive a batch of games from the Service Worker's background sync.

@@ -10,6 +10,7 @@
 import { Chess } from './vendor/chess.js';
 import { levelToParams } from './engine.js';
 import { saveGame, getAllGames, deleteGame, getGame } from './db.js';
+import { VERSION } from './version.js';
 
 // ---- Unicode glyphs --------------------------------------------------------
 const GLYPH = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
@@ -704,20 +705,48 @@ $('install').onclick = async () => {
 };
 window.addEventListener('appinstalled', () => ($('install').hidden = true));
 
-// Service worker
+// Service worker + auto-refresh onto new deploys.
+//
+// Each build stamps a fresh cache name into sw.js (scripts/gen-version.mjs), so
+// a new deploy makes the SW byte-different. When the browser installs it, sw.js
+// calls skipWaiting() and the new SW takes control → 'controllerchange' fires →
+// we reload once onto the new assets. `hadController` guards the very first
+// visit (where taking control is not an update and needs no reload).
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((reg) => {
-        swReg = reg;
-      })
-      .catch(() => {});
+  document.documentElement.dataset.version = VERSION;
+  const hadController = Boolean(navigator.serviceWorker.controller);
+  let reloading = false;
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController || reloading) return;
+    reloading = true;
+    window.location.reload();
   });
+
   navigator.serviceWorker.addEventListener('message', (event) => {
     if (event.data?.type === 'synced') {
       toast('Đã đồng bộ lịch sử ☁️');
       if (!$('history').hidden) openHistory();
+    }
+  });
+
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('/sw.js', {
+        updateViaCache: 'none', // always revalidate sw.js against the network
+      });
+      swReg = reg;
+
+      const checkForUpdate = () => reg.update().catch(() => {});
+      checkForUpdate();
+      // Re-check when the app regains focus or the network returns, so a
+      // long-lived (installed) session still picks up new deploys.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkForUpdate();
+      });
+      window.addEventListener('online', checkForUpdate);
+    } catch {
+      /* SW unsupported or blocked — the app still works, just no auto-update. */
     }
   });
 }
