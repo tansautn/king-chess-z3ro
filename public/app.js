@@ -13,6 +13,12 @@ import { saveGame, getAllGames, deleteGame, getGame } from './db.js';
 import { VERSION } from './version.js';
 
 // ---- Unicode glyphs --------------------------------------------------------
+// U+FE0E (VARIATION SELECTOR-15) forces *text* presentation. Without it,
+// Android/Chromium renders the chess codepoints (U+265A–F) from the system
+// COLOR-EMOJI font, which ignores CSS `color` — so both sides come out the same
+// dark glyph. Appending VS15 makes the browser use a monochrome text glyph, so
+// the configurable `--piece-w` / `--piece-b` colours actually apply.
+const VS15 = '\uFE0E'; // U+FE0E VARIATION SELECTOR-15
 const GLYPH = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
@@ -210,7 +216,7 @@ function render() {
       if (piece) {
         const p = document.createElement('span');
         p.className = 'piece ' + piece.color;
-        p.textContent = GLYPH[piece.type];
+        p.textContent = GLYPH[piece.type] + VS15; // VS15 → text (non-emoji) glyph
         cell.appendChild(p);
       }
 

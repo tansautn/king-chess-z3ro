@@ -160,6 +160,12 @@ body {
 
 .piece {
   pointer-events: none;
+  /* Reinforce text (non-emoji) rendering so `color` applies — see VS15 in
+     app.js. Prefer fonts with monochrome chess glyphs before any fallback can
+     reach the system colour-emoji font. */
+  font-variant-emoji: text;
+  font-family: 'Segoe UI Symbol', 'Noto Sans Symbols 2', 'Noto Sans Symbols',
+    'DejaVu Sans', 'Arial Unicode MS', sans-serif;
 }
 /* Cả hai bên đều có viền tối mảnh để mọi màu cấu hình vẫn rõ trên mọi ô. */
 .piece.w {
