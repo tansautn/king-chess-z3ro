@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "King Chess — an ad-free chess PWA that runs on Cloudflare Workers. Play offline, install to home screen, undo/redo, and sync game history via IndexedDB + Service Worker.",
   "type": "module",
+  "private" : true,
   "scripts": {
     "dev": "wrangler dev",
     "start": "wrangler dev",
@@ -23,8 +24,8 @@
     "service-worker",
     "chess.js"
   ],
-  "author": "",
-  "license": "MIT",
+  "author": "Zuko <tansautn@gmail.com>",
+  "license": "UNLICENSED",
   "dependencies": {
     "chess.js": "^1.4.0"
   },
