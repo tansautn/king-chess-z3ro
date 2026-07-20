@@ -30,7 +30,7 @@
         <h1 class="brand"><span class="crown">♔</span> King Chess z3ro</h1>
         <div class="topbar-right">
           <span id="net" class="net" title="Trạng thái mạng">●</span>
-          <button id="install" class="btn btn-ghost" hidden>Cài đặt</button>
+          <button id="install" class="btn btn-ghost" hidden>⬇ Cài ứng dụng</button>
         </div>
       </header>
 
@@ -39,7 +39,19 @@
       </p>
 
       <div class="board-wrap">
-        <div id="board" class="board" aria-label="Bàn cờ"></div>
+        <div class="board-frame">
+          <div id="ranks" class="ruler ranks" aria-hidden="true"></div>
+          <div id="board" class="board" aria-label="Bàn cờ"></div>
+          <div id="files" class="ruler files" aria-hidden="true"></div>
+          <button
+            id="focus-exit"
+            class="focus-exit"
+            title="Thoát toàn màn hình"
+            aria-label="Thoát toàn màn hình"
+          >
+            ⤢
+          </button>
+        </div>
       </div>
 
       <div class="controls">
@@ -49,9 +61,11 @@
         <button id="flip" class="btn">⇅ Lật bàn</button>
         <button id="hint" class="btn">💡 Gợi ý</button>
         <button id="history-btn" class="btn">🗂 Lịch sử</button>
+        <button id="settings-btn" class="btn" aria-expanded="false">⚙ Cài đặt</button>
+        <button id="focus" class="btn">⛶ Tập trung</button>
       </div>
 
-      <div class="settings">
+      <div id="settings" class="settings" hidden>
         <label>
           Bên của bạn
           <select id="side">

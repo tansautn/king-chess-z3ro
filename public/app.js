@@ -18,6 +18,8 @@ const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 // ---- Element refs ----------------------------------------------------------
 const $ = (id) => document.getElementById(id);
 const boardEl = $('board');
+const ranksEl = $('ranks');
+const filesEl = $('files');
 const statusEl = $('status');
 const moveListEl = $('movelist');
 const netEl = $('net');
@@ -144,27 +146,30 @@ function render() {
         cell.appendChild(dot);
       }
 
-      // coordinate labels along the two visible edges
-      if (ri === 7) {
-        const c = document.createElement('span');
-        c.className = 'coord file';
-        c.textContent = FILES[f];
-        cell.appendChild(c);
-      }
-      if (ci === 0) {
-        const c = document.createElement('span');
-        c.className = 'coord rank';
-        c.textContent = String(8 - r);
-        cell.appendChild(c);
-      }
-
       boardEl.appendChild(cell);
     }
   }
 
+  renderRulers(rows, cols);
   renderStatus();
   renderMoveList();
   renderControls();
+}
+
+/** Build the coordinate ruler that sits OUTSIDE the board (respects flip). */
+function renderRulers(rows, cols) {
+  ranksEl.innerHTML = '';
+  for (const r of rows) {
+    const s = document.createElement('span');
+    s.textContent = String(8 - r);
+    ranksEl.appendChild(s);
+  }
+  filesEl.innerHTML = '';
+  for (const f of cols) {
+    const s = document.createElement('span');
+    s.textContent = FILES[f];
+    filesEl.appendChild(s);
+  }
 }
 
 function kingSquare(color) {
@@ -417,6 +422,41 @@ function flip() {
   render();
 }
 
+// ===========================================================================
+// Settings panel + focus (fullscreen) mode
+// ===========================================================================
+
+function toggleSettings() {
+  const panel = $('settings');
+  panel.hidden = !panel.hidden;
+  $('settings-btn').setAttribute('aria-expanded', String(!panel.hidden));
+}
+
+function enterFocus() {
+  document.body.classList.add('focus-mode');
+  const el = document.documentElement;
+  // Fullscreen may be unsupported/blocked (e.g. iOS Safari); the CSS focus
+  // layout still hides the chrome so the intent works either way.
+  if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+}
+
+function exitFocus() {
+  document.body.classList.remove('focus-mode');
+  if (document.fullscreenElement && document.exitFullscreen) {
+    document.exitFullscreen().catch(() => {});
+  }
+}
+
+function toggleFocus() {
+  if (document.body.classList.contains('focus-mode')) exitFocus();
+  else enterFocus();
+}
+
+// Leaving fullscreen via Esc / system UI should also leave focus mode.
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) document.body.classList.remove('focus-mode');
+});
+
 async function hint() {
   if (thinking || game.isGameOver() || game.turn() !== humanColor) return;
   const move = await computeBestMove(game.fen(), { depth: 2, randomness: 0 });
@@ -629,6 +669,9 @@ $('undo').onclick = undo;
 $('redo').onclick = redo;
 $('flip').onclick = flip;
 $('hint').onclick = hint;
+$('settings-btn').onclick = toggleSettings;
+$('focus').onclick = toggleFocus;
+$('focus-exit').onclick = exitFocus;
 $('history-btn').onclick = openHistory;
 $('history-close').onclick = () => ($('history').hidden = true);
 $('history').addEventListener('click', (e) => {
